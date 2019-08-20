@@ -45,8 +45,7 @@ namespace Autofac.Features.OpenGenerics
             var rb = new RegistrationBuilder<object, ReflectionActivatorData, DynamicRegistrationStyle>(
                 new TypedService(implementor),
                 new ReflectionActivatorData(implementor),
-                new DynamicRegistrationStyle(),
-                builder.DefaultInstanceOwnership);
+                new DynamicRegistrationStyle());
 
             rb.RegistrationData.DeferredCallback = builder.RegisterCallback(cr => cr.AddRegistrationSource(
                 new OpenGenericRegistrationSource(rb.RegistrationData, rb.ActivatorData)));
@@ -64,8 +63,7 @@ namespace Autofac.Features.OpenGenerics
             var rb = new RegistrationBuilder<object, OpenGenericDecoratorActivatorData, DynamicRegistrationStyle>(
                 (Service)GetServiceWithKey(decoratedServiceType, toKey),
                 new OpenGenericDecoratorActivatorData(decoratorType, GetServiceWithKey(decoratedServiceType, fromKey)),
-                new DynamicRegistrationStyle(),
-                builder.DefaultInstanceOwnership);
+                new DynamicRegistrationStyle());
 
             rb.RegistrationData.DeferredCallback = builder.RegisterCallback(cr => cr.AddRegistrationSource(
                 new OpenGenericDecoratorRegistrationSource(rb.RegistrationData, rb.ActivatorData)));

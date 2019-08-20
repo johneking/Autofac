@@ -96,8 +96,7 @@ namespace Autofac
             var rb = new RegistrationBuilder<T, SimpleActivatorData, SingleRegistrationStyle>(
                 new TypedService(typeof(T)),
                 new SimpleActivatorData(activator),
-                new SingleRegistrationStyle(),
-                builder.DefaultInstanceOwnership);
+                new SingleRegistrationStyle());
 
             rb.SingleInstance();
 
@@ -128,7 +127,7 @@ namespace Autofac
         {
             if (builder == null) throw new ArgumentNullException(nameof(builder));
 
-            var rb = RegistrationBuilder.ForType<TImplementer>(builder.DefaultInstanceOwnership);
+            var rb = RegistrationBuilder.ForType<TImplementer>();
 
             rb.RegistrationData.DeferredCallback = builder.RegisterCallback(cr => RegistrationBuilder.RegisterSingleComponent(cr, rb));
 
@@ -147,7 +146,7 @@ namespace Autofac
             if (builder == null) throw new ArgumentNullException(nameof(builder));
             if (implementationType == null) throw new ArgumentNullException(nameof(implementationType));
 
-            var rb = RegistrationBuilder.ForType(implementationType, builder.DefaultInstanceOwnership);
+            var rb = RegistrationBuilder.ForType(implementationType);
 
             rb.RegistrationData.DeferredCallback = builder.RegisterCallback(cr => RegistrationBuilder.RegisterSingleComponent(cr, rb));
 
