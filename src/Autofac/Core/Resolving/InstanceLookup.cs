@@ -117,13 +117,20 @@ namespace Autofac.Core.Resolving
 
             try
             {
-                decoratorTarget = _newInstance = ComponentRegistration.Activator.ActivateInstance(this, resolveParameters);
-
-                _newInstance = InstanceDecorator.TryDecorateRegistration(
+                var decorationResult = InstanceDecorator.TryDecorateRegistration(
                     ComponentRegistration,
-                    _newInstance,
                     _activationScope,
-                    resolveParameters);
+                    resolveParameters,
+                    this);
+                if (decorationResult.Decorated)
+                {
+                    _newInstance = decorationResult.DecoratedInstance;
+                    decoratorTarget = decorationResult.ContainsDeferredExecution ? null : decorationResult.UndecoratedInstance;
+                }
+                else
+                {
+                    decoratorTarget = _newInstance = ComponentRegistration.Activator.ActivateInstance(this, resolveParameters);
+                }
             }
             catch (ObjectDisposedException)
             {

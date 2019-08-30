@@ -10,7 +10,7 @@ namespace Autofac.Test.Features.Decorators
         {
             const string implementationInstance = "Initial";
 
-            var context = DecoratorContext.Create(typeof(string), typeof(string), implementationInstance);
+            var context = DecoratorContext<string>.Create(implementationInstance);
 
             Assert.Equal(typeof(string), context.ServiceType);
             Assert.Equal(typeof(string), context.ImplementationType);
@@ -23,7 +23,7 @@ namespace Autofac.Test.Features.Decorators
         public void UpdateAddsDecoratorStateToContext()
         {
             const string implementationInstance = "Initial";
-            var context = DecoratorContext.Create(typeof(string), typeof(string), implementationInstance);
+            var context = DecoratorContext<string>.Create(implementationInstance);
 
             const string decoratorA = "DecoratorA";
             context = context.UpdateContext(decoratorA);

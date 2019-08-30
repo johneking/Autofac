@@ -56,5 +56,7 @@ namespace Autofac.Features.Decorators
         /// as each decorator is applied.
         /// </summary>
         object CurrentInstance { get; }
+
+        IDecoratorContext DeferredContext { get; }
     }
 }

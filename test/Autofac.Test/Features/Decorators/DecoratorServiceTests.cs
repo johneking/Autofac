@@ -18,7 +18,7 @@ namespace Autofac.Test.Features.Decorators
         {
             var service = new DecoratorService(typeof(string));
 
-            var context = DecoratorContext.Create(typeof(string), typeof(string), "A");
+            var context = DecoratorContext<string>.Create("A");
 
             Assert.True(service.Condition(context));
         }

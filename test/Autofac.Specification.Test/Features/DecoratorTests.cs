@@ -457,7 +457,7 @@ namespace Autofac.Specification.Test.Features
             }
         }
 
-        [Fact(Skip = "Issue #967")]
+        [Fact] // (Skip = "Issue #967")
         public void DecoratorParameterSupportsFunc()
         {
             var builder = new ContainerBuilder();
@@ -471,7 +471,7 @@ namespace Autofac.Specification.Test.Features
             Assert.IsType<ImplementorA>(instance.Decorated);
         }
 
-        [Fact(Skip = "Issue #967")]
+        [Fact] // (Skip = "Issue #967")
         public void DecoratorParameterSupportsLazy()
         {
             var builder = new ContainerBuilder();
