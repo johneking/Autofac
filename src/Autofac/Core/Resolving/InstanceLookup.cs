@@ -120,7 +120,7 @@ namespace Autofac.Core.Resolving
             try
             {
                 var decorationResult = InstanceDecorator.TryDecorateRegistration(
-	                _service,
+                    _service,
                     ComponentRegistration,
                     _activationScope,
                     resolveParameters,

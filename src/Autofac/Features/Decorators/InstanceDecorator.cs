@@ -37,27 +37,23 @@ namespace Autofac.Features.Decorators
     internal static class InstanceDecorator
     {
         internal static DecorationResult TryDecorateRegistration(
-	        Service service,
+            Service service,
             IComponentRegistration registration,
             IComponentContext context,
             IEnumerable<Parameter> parameters,
             InstanceLookup instanceLookup)
         {
-            var instanceType = instance.GetType();
-
-            if (registration.Services.OfType<DecoratorService>().Any()
+            if (registration.Services.OfType<DecoratorService>()
+                    .Any()
                 || !(service is IServiceWithType serviceWithType)
                 || registration is ExternalComponentRegistration) return DecorationResult.UndecoratedResult;
 
             var decoratorRegistrations = context.ComponentRegistry.RegistrationsFor(new DecoratorService(serviceWithType.ServiceType))
-	            .Where(r => !r.IsAdapterForIndividualComponent);
+                .Where(r => !r.IsAdapterForIndividualComponent)
+                .OrderBy(d => d.GetRegistrationOrder());
 
             var decorators = decoratorRegistrations
-                .Select(r => new
-                {
-                    Registration = r,
-                    Service = r.Services.OfType<DecoratorService>().First()
-                })
+                .Select(r => new DecoratorSpecification(r, r.Services.OfType<DecoratorService>().First()))
                 .ToArray();
 
             if (decorators.Length == 0) return DecorationResult.UndecoratedResult;
@@ -89,8 +85,8 @@ namespace Autofac.Features.Decorators
             IComponentContext componentContext,
             Parameter[] parameters)
         {
-            var decoratorNode = DecoratorHierarchyFactory.GetDecoratorHierarchy<TService>(specifications, componentRegistration, instanceLookup);
-            var resultContext = decoratorNode.Decorate(componentContext, parameters);
+            var decoratorNode = DecoratorPipelineFactory.GetDecoratorPipeline<TService>(specifications);
+            var resultContext = decoratorNode.Decorate(componentContext, parameters, componentRegistration, instanceLookup);
             return resultContext.Undecorated == null
                 ? DecorationResult.GetDeferredDecoratedResult(resultContext.Decorated)
                 : DecorationResult.GetDecoratedResult(resultContext.Undecorated, resultContext.Decorated);

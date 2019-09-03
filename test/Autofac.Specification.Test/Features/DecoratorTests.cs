@@ -524,12 +524,12 @@ namespace Autofac.Specification.Test.Features
             }
         }
 
-        [Fact] // (Skip = "Issue #967")
+        [Fact]
         public void DecoratorParameterSupportsFunc()
         {
             var builder = new ContainerBuilder();
             builder.RegisterType<ImplementorA>().As<IDecoratedService>();
-            builder.RegisterDecorator<DecoratorWithFunc, IDecoratedService>();
+            builder.RegisterDecorator<DecoratorWithFunc, IDecoratedService>(null, DecoratorAdaptionType.Func);
             var container = builder.Build();
 
             var instance = container.Resolve<IDecoratedService>();
@@ -538,12 +538,32 @@ namespace Autofac.Specification.Test.Features
             Assert.IsType<ImplementorA>(instance.Decorated);
         }
 
-        [Fact] // (Skip = "Issue #967")
+        [Fact]
+        public void DecoratorsSupportNestedFuncs()
+        {
+            var builder = new ContainerBuilder();
+            builder.RegisterType<ImplementorA>().As<IDecoratedService>();
+            builder.RegisterDecorator<DecoratorWithFunc, IDecoratedService>(null, DecoratorAdaptionType.Func);
+            builder.RegisterDecorator<DecoratorWithFunc, IDecoratedService>(null, DecoratorAdaptionType.Func);
+
+            var container = builder.Build();
+
+            var instance = container.Resolve<IDecoratedService>();
+            var firstGeneratedDecorator = instance.Decorated;
+            var secondGeneratedDecorator = instance.Decorated;
+            Assert.NotEqual(firstGeneratedDecorator, secondGeneratedDecorator);
+
+            Assert.IsType<DecoratorWithFunc>(instance);
+            Assert.IsType<DecoratorWithFunc>(instance.Decorated);
+            Assert.IsType<ImplementorA>(instance.Decorated.Decorated);
+        }
+
+        [Fact]
         public void DecoratorParameterSupportsLazy()
         {
             var builder = new ContainerBuilder();
             builder.RegisterType<ImplementorA>().As<IDecoratedService>();
-            builder.RegisterDecorator<DecoratorWithLazy, IDecoratedService>();
+            builder.RegisterDecorator<DecoratorWithLazy, IDecoratedService>(null, DecoratorAdaptionType.Lazy);
             var container = builder.Build();
 
             var instance = container.Resolve<IDecoratedService>();
@@ -822,22 +842,26 @@ namespace Autofac.Specification.Test.Features
 
         private class DecoratorWithFunc : IDecoratedService
         {
+            private readonly Func<IDecoratedService> _decorated;
+
             public DecoratorWithFunc(Func<IDecoratedService> decorated)
             {
-                this.Decorated = decorated();
+                _decorated = decorated;
             }
 
-            public IDecoratedService Decorated { get; }
+            public IDecoratedService Decorated => _decorated();
         }
 
         private class DecoratorWithLazy : IDecoratedService
         {
+            private readonly Lazy<IDecoratedService> _decorated;
+
             public DecoratorWithLazy(Lazy<IDecoratedService> decorated)
             {
-                this.Decorated = decorated.Value;
+                _decorated = decorated;
             }
 
-            public IDecoratedService Decorated { get; }
+            public IDecoratedService Decorated => _decorated.Value;
         }
 
         private class DecoratorWithParameter : Decorator, IDecoratorWithParameter

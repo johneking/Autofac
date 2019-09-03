@@ -1328,12 +1328,13 @@ namespace Autofac
         /// <param name="builder">Container builder.</param>
         /// <param name="condition">A function that when provided with an <see cref="IDecoratorContext"/>
         /// instance determines if the decorator should be applied.</param>
-        public static void RegisterDecorator<TDecorator, TService>(this ContainerBuilder builder, Func<IDecoratorContext, bool> condition = null)
+        /// <param name="adaptionType">The type of additional adaption to apply for service instance dependencies for this decorator.</param>
+        public static void RegisterDecorator<TDecorator, TService>(this ContainerBuilder builder, Func<IDecoratorContext, bool> condition = null, DecoratorAdaptionType adaptionType = DecoratorAdaptionType.None)
             where TDecorator : TService
         {
             if (builder == null) throw new ArgumentNullException(nameof(builder));
 
-            builder.RegisterType<TDecorator>().As(new DecoratorService(typeof(TService), condition));
+            builder.RegisterType<TDecorator>().As(new DecoratorService(typeof(TService), condition, adaptionType));
         }
 
         /// <summary>

@@ -1,24 +1,29 @@
 ﻿using System.Linq;
 using Autofac.Core;
+using Autofac.Core.Resolving;
 
 namespace Autofac.Features.Decorators
 {
-    internal class DecoratorNode<TService> : DecoratorNodeBase<TService>
+    internal class DecoratorPipelineSection<TService> : DecoratorPipelineSectionBase<TService>
     {
         protected IComponentRegistration DecoratorRegistration { get; }
 
         protected DecoratorService DecoratorService { get; }
 
-        public DecoratorNode(IDecoratorNode<TService> childNode, IComponentRegistration decoratorRegistration, DecoratorService decoratorService)
-            : base(childNode)
+        public DecoratorPipelineSection(IDecoratorPipelineSection<TService> childPipelineSection, IComponentRegistration decoratorRegistration, DecoratorService decoratorService)
+            : base(childPipelineSection)
         {
             DecoratorRegistration = decoratorRegistration;
             DecoratorService = decoratorService;
         }
 
-        public override DecoratorContext<TService> Decorate(IComponentContext context, Parameter[] parameters)
+        public override DecoratorContext<TService> Decorate(
+            IComponentContext context,
+            Parameter[] parameters,
+            IComponentRegistration registration,
+            InstanceLookup instanceLookup)
         {
-            var result = ChildNode.Decorate(context, parameters);
+            var result = ChildPipelineSection.Decorate(context, parameters, registration, instanceLookup);
             if (DecoratorService.Condition(result))
             {
                 var nextDecorator = ResolveNextDecorator(DecoratorRegistration, result.Decorated, result, context, parameters);

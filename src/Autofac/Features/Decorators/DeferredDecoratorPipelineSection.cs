@@ -1,22 +1,27 @@
 ﻿using System;
 using System.Linq;
 using Autofac.Core;
+using Autofac.Core.Resolving;
 
 namespace Autofac.Features.Decorators
 {
-    internal class DeferredDecoratorNode<TService> : DecoratorNode<TService>
+    internal class DeferredDecoratorPipelineSection<TService> : DecoratorPipelineSection<TService>
     {
         protected virtual Parameter CreateDeferredParameter(Func<TService> func)
         {
             return new TypedParameter(typeof(Func<TService>), func);
         }
 
-        public override DecoratorContext<TService> Decorate(IComponentContext context, Parameter[] parameters)
+        public override DecoratorContext<TService> Decorate(
+            IComponentContext context,
+            Parameter[] parameters,
+            IComponentRegistration registration,
+            InstanceLookup instanceLookup)
         {
             Action<DecoratorContext<TService>> updateDeferredContextAction = d => { };
             TService Result()
             {
-                var decorated = ChildNode.Decorate(context, parameters);
+                var decorated = ChildPipelineSection.Decorate(context, parameters, registration, instanceLookup);
                 updateDeferredContextAction(decorated);
                 return decorated.Decorated;
             }
@@ -39,11 +44,11 @@ namespace Autofac.Features.Decorators
             return (TService)context.ResolveComponent(new ResolveRequest(DecoratorService, decoratorRegistration, invokeParameters));
         }
 
-        public DeferredDecoratorNode(
-            IDecoratorNode<TService> childNode,
+        public DeferredDecoratorPipelineSection(
+            IDecoratorPipelineSection<TService> childPipelineSection,
             IComponentRegistration decoratorRegistration,
             DecoratorService decoratorService)
-            : base(childNode, decoratorRegistration, decoratorService)
+            : base(childPipelineSection, decoratorRegistration, decoratorService)
         {
         }
     }
