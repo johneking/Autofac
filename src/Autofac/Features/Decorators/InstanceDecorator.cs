@@ -27,6 +27,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Autofac.Builder;
 using Autofac.Core;
 using Autofac.Core.Registration;
 using Autofac.Core.Resolving;
@@ -36,27 +37,32 @@ namespace Autofac.Features.Decorators
     internal static class InstanceDecorator
     {
         internal static DecorationResult TryDecorateRegistration(
+	        Service service,
             IComponentRegistration registration,
             IComponentContext context,
             IEnumerable<Parameter> parameters,
             InstanceLookup instanceLookup)
         {
-            // Issue #965: Do not apply the decorator if the registration is for an adapter.
-            if (registration.IsAdapting()) return DecorationResult.UndecoratedResult;
+            var instanceType = instance.GetType();
 
-            var decoratorRegistrations = context.ComponentRegistry.DecoratorsFor(registration);
+            if (registration.Services.OfType<DecoratorService>().Any()
+                || !(service is IServiceWithType serviceWithType)
+                || registration is ExternalComponentRegistration) return DecorationResult.UndecoratedResult;
 
-            // ReSharper disable once PossibleMultipleEnumeration
-            if (!decoratorRegistrations.Any()) return DecorationResult.UndecoratedResult;
+            var decoratorRegistrations = context.ComponentRegistry.RegistrationsFor(new DecoratorService(serviceWithType.ServiceType))
+	            .Where(r => !r.IsAdapterForIndividualComponent);
 
-            // ReSharper disable once PossibleMultipleEnumeration
             var decorators = decoratorRegistrations
-                .Select(r => new DecoratorSpecification(r, r.Services.OfType<DecoratorService>().First()))
+                .Select(r => new
+                {
+                    Registration = r,
+                    Service = r.Services.OfType<DecoratorService>().First()
+                })
                 .ToArray();
 
             if (decorators.Length == 0) return DecorationResult.UndecoratedResult;
 
-            var serviceType = decorators[0].Service.ServiceType;
+            var serviceType = serviceWithType.ServiceType;
             var resolveParameters = parameters as Parameter[] ?? parameters.ToArray();
 
             return DecorateByType(serviceType, decorators, registration, instanceLookup, context, resolveParameters);

@@ -40,6 +40,7 @@ namespace Autofac.Core.Resolving
     {
         private readonly IResolveOperation _context;
         private readonly ISharingLifetimeScope _activationScope;
+        private readonly Service _service;
         private object _newInstance;
         private bool _executed;
         private const string ActivatorChainExceptionData = "ActivatorChain";
@@ -49,9 +50,10 @@ namespace Autofac.Core.Resolving
             ISharingLifetimeScope mostNestedVisibleScope,
             ResolveRequest request)
         {
-            Parameters = request.Parameters;
-            ComponentRegistration = request.Registration;
             _context = context;
+            _service = request.Service;
+            ComponentRegistration = request.Registration;
+            Parameters = request.Parameters;
 
             try
             {
@@ -118,6 +120,7 @@ namespace Autofac.Core.Resolving
             try
             {
                 var decorationResult = InstanceDecorator.TryDecorateRegistration(
+	                _service,
                     ComponentRegistration,
                     _activationScope,
                     resolveParameters,
