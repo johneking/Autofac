@@ -39,7 +39,7 @@ namespace Autofac.Features.Decorators
         /// <inheritdoc />
         public Type ServiceType { get; }
 
-        public DecoratorAdaptionType AdaptionType { get; }
+        public EDecoratorAdaptionType AdaptionType { get; }
 
         /// <summary>
         /// Gets the condition that must be met for the decorator to be applied.
@@ -52,7 +52,7 @@ namespace Autofac.Features.Decorators
         /// <param name="serviceType">The service type for the decorator.</param>
         /// <param name="condition">The condition that must be met for the decorator to be applied.</param>
         /// <param name="decoratorAdaptionType">The type of additional adaption to apply for service instance dependencies for this decorator.</param>
-        public DecoratorService(Type serviceType, Func<IDecoratorContext, bool> condition = null, DecoratorAdaptionType decoratorAdaptionType = DecoratorAdaptionType.None)
+        public DecoratorService(Type serviceType, Func<IDecoratorContext, bool> condition = null, EDecoratorAdaptionType decoratorAdaptionType = EDecoratorAdaptionType.None)
         {
             ServiceType = serviceType ?? throw new ArgumentNullException(nameof(serviceType));
             Condition = condition ?? (context => true);
@@ -67,7 +67,7 @@ namespace Autofac.Features.Decorators
         {
             if (newType == null) throw new ArgumentNullException(nameof(newType));
 
-            return new DecoratorService(newType, Condition);
+            return new DecoratorService(newType, Condition, AdaptionType);
         }
 
         /// <inheritdoc />

@@ -17,29 +17,12 @@ namespace Autofac.Features.Decorators
             var pipelineSection = componentPipelineSection;
             foreach (var decoratorSpecification in specifications)
             {
-                pipelineSection = AddDecoratorPipelineSection(
+                pipelineSection = decoratorSpecification.Service.AdaptionType.Value().AddDecoratorPipelineSection(
                     pipelineSection,
                     decoratorSpecification);
             }
 
             return pipelineSection;
-        }
-
-        private static IDecoratorPipelineSection<TService> AddDecoratorPipelineSection<TService>(
-            IDecoratorPipelineSection<TService> currentPipelineSection,
-            DecoratorSpecification decoratorSpecification)
-        {
-            switch (decoratorSpecification.Service.AdaptionType)
-            {
-                case DecoratorAdaptionType.None:
-                    return currentPipelineSection.AddDecorator(decoratorSpecification.Registration, decoratorSpecification.Service);
-                case DecoratorAdaptionType.Func:
-                    return currentPipelineSection.AddFuncDecorator(decoratorSpecification.Registration, decoratorSpecification.Service);
-                case DecoratorAdaptionType.Lazy:
-                    return currentPipelineSection.AddLazyDecorator(decoratorSpecification.Registration, decoratorSpecification.Service);
-                default:
-                    throw new ArgumentOutOfRangeException($"Invalid {nameof(DecoratorAdaptionType)}");
-            }
         }
     }
 }

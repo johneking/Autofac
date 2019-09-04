@@ -1,20 +1,49 @@
-﻿namespace Autofac.Features.Decorators
+﻿using System;
+
+namespace Autofac.Features.Decorators
 {
-    public enum DecoratorAdaptionType
+    internal abstract class DecoratorAdaptionType
     {
-        /// <summary>
-        /// Decorator takes a direct dependency on the service type
-        /// </summary>
-        None,
+        internal abstract IDecoratorPipelineSection<TService> AddDecoratorPipelineSection<TService>(
+            IDecoratorPipelineSection<TService> pipeline,
+            DecoratorSpecification decoratorSpecification);
 
-        /// <summary>
-        /// Decorator takes a dependency on a Func instance of the service type
-        /// </summary>
-        Func,
+        internal abstract EDecoratorAdaptionType Type { get; }
 
-        /// <summary>
-        /// Decorator takes a dependency on a Lazy instance of the service type
-        /// </summary>
-        Lazy
+        internal class NoDecoratorAdaptionType : DecoratorAdaptionType
+        {
+            internal override IDecoratorPipelineSection<TService> AddDecoratorPipelineSection<TService>(IDecoratorPipelineSection<TService> pipeline, DecoratorSpecification decoratorSpecification)
+            {
+                return pipeline.AddDecorator(decoratorSpecification.Registration, decoratorSpecification.Service);
+            }
+
+            internal override EDecoratorAdaptionType Type => EDecoratorAdaptionType.None;
+        }
+
+        internal class FuncDecoratorAdaptionType : DecoratorAdaptionType
+        {
+            internal override IDecoratorPipelineSection<TService> AddDecoratorPipelineSection<TService>(IDecoratorPipelineSection<TService> pipeline, DecoratorSpecification decoratorSpecification)
+            {
+                return pipeline.AddFuncDecorator(decoratorSpecification.Registration, decoratorSpecification.Service);
+            }
+
+            internal override EDecoratorAdaptionType Type => EDecoratorAdaptionType.Func;
+        }
+
+        internal class LazyDecoratorAdaptionType : DecoratorAdaptionType
+        {
+            internal override IDecoratorPipelineSection<TService> AddDecoratorPipelineSection<TService>(IDecoratorPipelineSection<TService> pipeline, DecoratorSpecification decoratorSpecification)
+            {
+                return pipeline.AddLazyDecorator(decoratorSpecification.Registration, decoratorSpecification.Service);
+            }
+
+            internal override EDecoratorAdaptionType Type => EDecoratorAdaptionType.Lazy;
+        }
+
+        internal static DecoratorAdaptionType None { get; } = new NoDecoratorAdaptionType();
+
+        internal static DecoratorAdaptionType Func { get; } = new FuncDecoratorAdaptionType();
+
+        internal static DecoratorAdaptionType Lazy { get; } = new LazyDecoratorAdaptionType();
     }
 }

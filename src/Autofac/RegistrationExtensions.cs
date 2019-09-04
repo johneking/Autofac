@@ -1329,7 +1329,10 @@ namespace Autofac
         /// <param name="condition">A function that when provided with an <see cref="IDecoratorContext"/>
         /// instance determines if the decorator should be applied.</param>
         /// <param name="adaptionType">The type of additional adaption to apply for service instance dependencies for this decorator.</param>
-        public static void RegisterDecorator<TDecorator, TService>(this ContainerBuilder builder, Func<IDecoratorContext, bool> condition = null, DecoratorAdaptionType adaptionType = DecoratorAdaptionType.None)
+        public static void RegisterDecorator<TDecorator, TService>(
+            this ContainerBuilder builder,
+            Func<IDecoratorContext, bool> condition = null,
+            EDecoratorAdaptionType adaptionType = EDecoratorAdaptionType.None)
             where TDecorator : TService
         {
             if (builder == null) throw new ArgumentNullException(nameof(builder));
@@ -1347,17 +1350,19 @@ namespace Autofac
         /// <param name="serviceType">Service type being decorated.</param>
         /// <param name="condition">A function that when provided with an <see cref="IDecoratorContext"/>
         /// instance determines if the decorator should be applied.</param>
+        /// <param name="adaptionType">The type of additional adaption to apply for service instance dependencies for this decorator.</param>
         public static void RegisterDecorator(
             this ContainerBuilder builder,
             Type decoratorType,
             Type serviceType,
-            Func<IDecoratorContext, bool> condition = null)
+            Func<IDecoratorContext, bool> condition = null,
+            EDecoratorAdaptionType adaptionType = EDecoratorAdaptionType.None)
         {
             if (builder == null) throw new ArgumentNullException(nameof(builder));
             if (decoratorType == null) throw new ArgumentNullException(nameof(decoratorType));
             if (serviceType == null) throw new ArgumentNullException(nameof(serviceType));
 
-            builder.RegisterType(decoratorType).As(new DecoratorService(serviceType, condition));
+            builder.RegisterType(decoratorType).As(new DecoratorService(serviceType, condition, adaptionType));
         }
 
         /// <summary>
@@ -1381,20 +1386,20 @@ namespace Autofac
             var service = new DecoratorService(typeof(TService), condition);
 
             builder.Register((c, p) =>
-            {
-                var instance = (TService)p
-                    .OfType<TypedParameter>()
-                    .FirstOrDefault(tp => tp.Type == typeof(TService))
-                    ?.Value;
-
-                if (instance == null)
                 {
-                    throw new DependencyResolutionException(String.Format(CultureInfo.CurrentCulture, RegistrationExtensionsResources.DecoratorRequiresInstanceParameter, typeof(TService).Name));
-                }
+                    var instance = (TService)p
+                        .OfType<TypedParameter>()
+                        .FirstOrDefault(tp => tp.Type == typeof(TService))
+                        ?.Value;
 
-                return decorator(c, p, instance);
-            })
-            .As(service);
+                    if (instance == null)
+                    {
+                        throw new DependencyResolutionException(String.Format(CultureInfo.CurrentCulture, RegistrationExtensionsResources.DecoratorRequiresInstanceParameter, typeof(TService).Name));
+                    }
+
+                    return decorator(c, p, instance);
+                })
+                .As(service);
         }
 
         /// <summary>
@@ -1406,11 +1411,13 @@ namespace Autofac
         /// <param name="serviceType">Service type being decorated. Must be an open generic type.</param>
         /// <param name="condition">A function that when provided with an <see cref="IDecoratorContext"/>
         /// instance determines if the decorator should be applied.</param>
+        /// <param name="adaptionType">The type of additional adaption to apply for service instance dependencies for this decorator.</param>
         public static void RegisterGenericDecorator(
             this ContainerBuilder builder,
             Type decoratorType,
             Type serviceType,
-            Func<IDecoratorContext, bool> condition = null)
+            Func<IDecoratorContext, bool> condition = null,
+            EDecoratorAdaptionType adaptionType = EDecoratorAdaptionType.None)
         {
             if (builder == null) throw new ArgumentNullException(nameof(builder));
             if (decoratorType == null) throw new ArgumentNullException(nameof(decoratorType));
@@ -1418,7 +1425,7 @@ namespace Autofac
 
             OpenGenericRegistrationExtensions
                 .RegisterGeneric(builder, decoratorType)
-                .As(new DecoratorService(serviceType, condition));
+                .As(new DecoratorService(serviceType, condition, adaptionType));
         }
 
         /// <summary>

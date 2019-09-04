@@ -85,8 +85,8 @@ namespace Autofac.Features.Decorators
             IComponentContext componentContext,
             Parameter[] parameters)
         {
-            var decoratorNode = DecoratorPipelineFactory.GetDecoratorPipeline<TService>(specifications);
-            var resultContext = decoratorNode.Decorate(componentContext, parameters, componentRegistration, instanceLookup);
+            var decoratorPipeline = DecoratorPipelineFactory.GetDecoratorPipeline<TService>(specifications);
+            var resultContext = decoratorPipeline.Decorate(componentContext, parameters, componentRegistration, instanceLookup);
             return resultContext.Undecorated == null
                 ? DecorationResult.GetDeferredDecoratedResult(resultContext.Decorated)
                 : DecorationResult.GetDecoratedResult(resultContext.Undecorated, resultContext.Decorated);

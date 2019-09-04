@@ -155,6 +155,30 @@ namespace Autofac.Test.Features.Decorators
             }
         }
 
+        private class DecoratorWithFunc<T> : IDecoratedService<T>
+        {
+            private readonly Func<IDecoratedService<T>> _decorated;
+
+            public DecoratorWithFunc(Func<IDecoratedService<T>> decorated)
+            {
+                _decorated = decorated;
+            }
+
+            public IDecoratedService<T> Decorated => _decorated();
+        }
+
+        private class DecoratorWithLazy<T> : IDecoratedService<T>
+        {
+            private readonly Lazy<IDecoratedService<T>> _decorated;
+
+            public DecoratorWithLazy(Lazy<IDecoratedService<T>> decorated)
+            {
+                _decorated = decorated;
+            }
+
+            public IDecoratedService<T> Decorated => _decorated.Value;
+        }
+
         [Fact]
         public void RegistrationIncludesTheServiceType()
         {
@@ -836,6 +860,20 @@ namespace Autofac.Test.Features.Decorators
             var instance = container.Resolve<ICommandHandler<CreateLocation>>();
 
             Assert.IsType<TransactionalCommandHandlerDecorator<CreateLocation>>(instance);
+        }
+
+        [Fact]
+        public void GenericDecoratorParameterSupportsFunc()
+        {
+            var builder = new ContainerBuilder();
+            builder.RegisterGeneric(typeof(ImplementorA<>)).As(typeof(IDecoratedService<>));
+            builder.RegisterGenericDecorator(typeof(DecoratorWithFunc<>), typeof(IDecoratedService<>), null, EDecoratorAdaptionType.Func);
+            var container = builder.Build();
+
+            var instance = container.Resolve<IDecoratedService<int>>();
+
+            Assert.IsType<DecoratorWithFunc<int>>(instance);
+            Assert.IsType<ImplementorA<int>>(instance.Decorated);
         }
 
         public interface ICommandHandler<T>

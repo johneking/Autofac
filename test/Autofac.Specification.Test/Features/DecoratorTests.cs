@@ -529,7 +529,21 @@ namespace Autofac.Specification.Test.Features
         {
             var builder = new ContainerBuilder();
             builder.RegisterType<ImplementorA>().As<IDecoratedService>();
-            builder.RegisterDecorator<DecoratorWithFunc, IDecoratedService>(null, DecoratorAdaptionType.Func);
+            builder.RegisterDecorator<DecoratorWithFunc, IDecoratedService>(null, EDecoratorAdaptionType.Func);
+            var container = builder.Build();
+
+            var instance = container.Resolve<IDecoratedService>();
+
+            Assert.IsType<DecoratorWithFunc>(instance);
+            Assert.IsType<ImplementorA>(instance.Decorated);
+        }
+
+        [Fact(Skip="Not yet supported")]
+        public void DecoratorRegisteredOnLambdaSupportsFuncDependency()
+        {
+            var builder = new ContainerBuilder();
+            builder.RegisterType<ImplementorA>().As<IDecoratedService>();
+            builder.RegisterDecorator<IDecoratedService>((c, p, i) => new DecoratorWithFunc(c.Resolve<Func<IDecoratedService>>()), null, EDecoratorAdaptionType.Func);
             var container = builder.Build();
 
             var instance = container.Resolve<IDecoratedService>();
@@ -543,8 +557,8 @@ namespace Autofac.Specification.Test.Features
         {
             var builder = new ContainerBuilder();
             builder.RegisterType<ImplementorA>().As<IDecoratedService>();
-            builder.RegisterDecorator<DecoratorWithFunc, IDecoratedService>(null, DecoratorAdaptionType.Func);
-            builder.RegisterDecorator<DecoratorWithFunc, IDecoratedService>(null, DecoratorAdaptionType.Func);
+            builder.RegisterDecorator<DecoratorWithFunc, IDecoratedService>(null, EDecoratorAdaptionType.Func);
+            builder.RegisterDecorator<DecoratorWithFunc, IDecoratedService>(null, EDecoratorAdaptionType.Func);
 
             var container = builder.Build();
 
@@ -563,7 +577,7 @@ namespace Autofac.Specification.Test.Features
         {
             var builder = new ContainerBuilder();
             builder.RegisterType<ImplementorA>().As<IDecoratedService>();
-            builder.RegisterDecorator<DecoratorWithLazy, IDecoratedService>(null, DecoratorAdaptionType.Lazy);
+            builder.RegisterDecorator<DecoratorWithLazy, IDecoratedService>(null, EDecoratorAdaptionType.Lazy);
             var container = builder.Build();
 
             var instance = container.Resolve<IDecoratedService>();
