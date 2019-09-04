@@ -1,4 +1,4 @@
-﻿// This software is part of the Autofac IoC container using System;
+﻿// This software is part of the Autofac IoC container
 // Copyright © 2018 Autofac Contributors
 // https://autofac.org
 //
